@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TodoItem from './TodoItem';
 
 function TodoList() {
-    const [tasks, setTasks] = useState([ // Variables to access & set tasks
-        {
-            id: 1,
-            text: 'Doctor Appointment',
-            completed: true
-        },
-        {
-            id: 2,
-            text: 'Meeting @ School',
-            completed: false
-        }
-    ]);
+    // Retrieve stored tasks or default to empty array
+    const [tasks, setTasks] = useState(() => {
+        const storedTasks = localStorage.getItem('tasks');
+        return storedTasks ? JSON.parse(storedTasks) : []
+    });
 
-    const [text, setText] = useState(''); // Variables to access & set text
+
+    const [text, setText] = useState('');
+
+    // Save tasks to Local Store whenever tasks state changes
+    useEffect(() => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }, [tasks]);
+
     function addTask(text) {
+        if (text.trim() === '') return;
+
         const newTask = {
             id: Date.now(),
             text,
@@ -25,9 +27,11 @@ function TodoList() {
         setTasks([...tasks, newTask]);
         setText('');
     }
+
     function deleteTask(id) {
         setTasks(tasks.filter(task => task.id !== id));
     }
+
     function toggleCompleted(id) {
         setTasks(tasks.map(task => {
             if (task.id === id) {
